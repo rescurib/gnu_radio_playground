@@ -1,2 +1,10 @@
-# gnu_radio_playground
-Notas sueltas y experimentos con GNU Radio API de C++
+# Notas sueltas y experimentos con la API de GNU Radiode de C++
+
+## Instalación en Linux Mint / Ubuntu
+
+```Bash
+sudo apt update
+sudo apt upgrade
+sudo apt-get install gnuradio
+sudo apt install gnuradio-dev
+```
