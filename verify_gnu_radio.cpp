@@ -34,9 +34,14 @@ int main() {
     tb->connect(src, 0, throttle, 0);
     tb->connect(throttle, 0, sink, 0);
 
+    // Crear e iniciar el hilo del flowgraph
     tb->start();
     std::this_thread::sleep_for(std::chrono::seconds(2));
+
+    // Detener el flowgraph
     tb->stop();
+
+    // Esperar a que el hilo del flowgraph termine
     tb->wait();
 
     std::cout << "Flowgraph ejecutado exitosamente." << std::endl;
