@@ -89,7 +89,7 @@ int main() {
 
 ### Compilación con make
 
-La API de GNU Radio esta dividida en muchos paquetes y sería un dolor de cabeza añadir manualmente las banderas de compilación que vamos a necesitar. Pero tenemos a nuestra herramienta [pkt-config](https://linux.die.net/man/1/pkg-config). Podemos autmatizar esta tarea directemente en el archivo Makefile:
+La API de GNU Radio esta dividida en muchos paquetes y sería un dolor de cabeza añadir manualmente las banderas de compilación que vamos a necesitar. Pero tenemos a nuestra herramienta [pkt-config](https://linux.die.net/man/1/pkg-config). Podemos automatizar esta tarea directamente en el archivo Makefile:
 ```Makefile
 PKG_CONFIG = pkg-config
 GNURADIO_PKGS = $(shell $(PKG_CONFIG) --list-all | grep '^gnuradio-' | cut -d ' ' -f 1)
