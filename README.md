@@ -86,3 +86,20 @@ int main() {
     return 0;
 }
 ```
+
+### Compilación con make
+
+La API de GNU Radio esta dividida en muchos paquetes y sería un dolor de cabeza añadir manualmente las banderas de compilación que vamos a necesitar. Pero tenemos a nuestra herramienta [pkt-config](https://linux.die.net/man/1/pkg-config). Podemos autmatizar esta tarea directemente en el archivo Makefile:
+```Makefile
+PKG_CONFIG = pkg-config
+GNURADIO_PKGS = $(shell $(PKG_CONFIG) --list-all | grep '^gnuradio-' | cut -d ' ' -f 1)
+CXXFLAGS += $(shell $(PKG_CONFIG) --cflags $(GNURADIO_PKGS))
+LDFLAGS += $(shell $(PKG_CONFIG) --libs $(GNURADIO_PKGS)) -lfmt
+```
+Los argumentos de grep y cut son los siguientes:
+* `^` significa "inicio línea".
+* `cut` es un comando que extrae campos de lineas de texto.
+* `-d ' '`: espacio como delimitador.
+* `-f 1`: primer campo de cada línea.
+
+GNU Radio también usa la librería [fmt](https://fmt.dev/11.1/) y para eso es el flag `-lfmt`.

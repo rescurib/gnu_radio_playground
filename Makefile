@@ -1,21 +1,23 @@
-# Makefile for GNU Radio C++ apps
+# Makefile para aplicaciones de GNU Radio en C++
 
 CXX = g++
 CXXFLAGS = -Wall -std=c++17
 PKG_CONFIG = pkg-config
 
-# Ask pkg-config to get the compiler and linker flags
-PKG_MODULES = gnuradio-runtime gnuradio-blocks gnuradio-analog
-CXXFLAGS += $(shell $(PKG_CONFIG) --cflags $(PKG_MODULES))
-LDFLAGS += $(shell $(PKG_CONFIG) --libs $(PKG_MODULES)) -lfmt
+# Obtención de banderas con pkg-config
+GNURADIO_PKGS = $(shell $(PKG_CONFIG) --list-all | grep '^gnuradio-' | cut -d ' ' -f 1)
+CXXFLAGS += $(shell $(PKG_CONFIG) --cflags $(GNURADIO_PKGS))
+LDFLAGS += $(shell $(PKG_CONFIG) --libs $(GNURADIO_PKGS)) -lfmt
 
-# Output binary name
-TARGET = verify_gnu_radio
-SRCS = verify_gnu_radio.cpp
+# Nombre del proyecto
+PROJECT_NAME = verify_gnu_radio
+
+SRC = $(PROJECT_NAME).cpp
+TARGET = $(PROJECT_NAME)
 
 all: $(TARGET)
 
-$(TARGET): $(SRCS)
+$(TARGET): $(SRC)
 	$(CXX) $(CXXFLAGS) -o $@ $^ $(LDFLAGS)
 
 clean:
