@@ -41,10 +41,65 @@ Por ejemplo, para procesar solo los primeros 20 ms de la señal del ejemplo ante
 ```C++
 #include <gnuradio/blocks/head.h>
 
-const float fs = 44000.0f; // Frecuencia de muestreo
+const float fs = 44000.0f;   // Frecuencia de muestreo
 const int tiempo_final = 40; // Tiempo final en ms
 const int num_muestras = static_cast<int>(fs * tiempo_final / 1000.0f);
 
 // Limitador de muestras
 auto head = gr::blocks::head::make(sizeof(float), num_muestras);
+```
+## Sumidero de archivo
+
+En varios de los ejemplos de filtros digitales enviaremos las señales procesadas a un archivo binario de tipo .dat. Pero primero debemos añadir un header que contenga la información necesaria para poder post-procesarla con Octave o Python.
+
+`Nota`. Se que existe un sumidero de archivo especial llamado [file_meta_sink](https://www.gnuradio.org/doc/doxygen/classgr_1_1blocks_1_1file__meta__sink.html) que permite añadir esta información pero aún sigo tratando de entenderlo. Podré una nota acá cuando lo haga.
+
+Por ahora podemos crear un binario con header customizado y después crear un sumidero de archivo convencional:
+
+```C++
+#include <iostream>
+#include <chrono>
+#include <gnuradio/blocks/file_sink.h>
+
+// Escribir header personalizado en signal.dat
+std::ofstream outfile("signal.dat", std::ios::binary | std::ios::trunc);
+if (outfile.is_open()) 
+{
+    outfile << "fs=" << fs << "\n";
+    outfile << "datatype=float\n";
+    outfile << "datasize=" << sizeof(float)*1 << "\n";
+    auto now = std::chrono::system_clock::now();
+    auto now_sec = std::chrono::duration_cast<std::chrono::seconds>(now.time_since_epoch()).count();
+    outfile << "timestamp=" << now_sec << "\n";
+    outfile.close();
+} else 
+  {
+    std::cerr << "No se pudo abrir signal.dat para escribir el header." << std::endl;
+    return 1;
+  }
+
+// Sink de archivo para una señal
+auto sink = gr::blocks::file_sink::make(sizeof(float)*1, "signal.dat", true); // true: append mode
+```
+
+## Uniendo todas las piezas
+
+El programa generador.cpp crea y combina 3 generadores de señales senoidales, toma 20 ms de muestras y las guarda en un binario. El diagrama de bloques del flujo implementado es el siguiente:
+
+```mermaid
+flowchart TD
+    SRC1["Senoidal f1=200Hz"]
+    SRC2["Senoidal f2=2000Hz"]
+    SRC3["Senoidal f3=5000Hz"]
+    ADD1["Suma src1 + src2"]
+    ADD2["Suma (src1+src2) + src3"]
+    HEAD["Head (limita muestras)"]
+    SINK["File Sink (signal.dat)"]
+
+    SRC1 --> ADD1
+    SRC2 --> ADD1
+    ADD1 --> ADD2
+    SRC3 --> ADD2
+    ADD2 --> HEAD
+    HEAD --> SINK
 ```

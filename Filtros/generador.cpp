@@ -46,7 +46,7 @@ int main(int argc, char** argv) {
         return 1;
     }
 
-    // Sink de archivo para dos señales (vector de 2 floats)
+    // Sink de archivo para una señal
     auto sink = gr::blocks::file_sink::make(sizeof(float)*1, "signal.dat", true); // true: append mode
 
     // Limitador de muestras para cada señal
