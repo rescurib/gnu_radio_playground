@@ -4,7 +4,7 @@ En esta carpeta voy a colocar notas de implementación de diferentes filtros dig
 
 ## Bloque de generación de señal.
 
-La API de GNU Radio usa constantemente una característica de C++ llamada [Plantilla de Clase](https://learn.microsoft.com/es-es/cpp/cpp/templates-cpp). Es muy importante entender este concepto o será muy confuso utilizarla. [Aquí](https://www.youtube.com/watch?v=mQqzP9EWu58) hay un video conciso y bueno.
+La API de GNU Radio usa constantemente una característica de C++ llamada [Plantillas de Clase](https://learn.microsoft.com/es-es/cpp/cpp/templates-cpp). Es muy importante entender este concepto o será muy confuso utilizarla. [Aquí](https://www.youtube.com/watch?v=mQqzP9EWu58) hay un video conciso y bueno.
 
 `sig_source`[[doc](https://www.gnuradio.org/doc/doxygen/classgr_1_1analog_1_1sig__source.html)] es una platilla de clase que nos permite instanciar generadores de señales de diferentes tipos de datos. La manera en la que la documentación oficial presenta las diferetes plantillas me parece confusa así que suelo referir directamente al archivo de header [sig_source.h](https://www.gnuradio.org/doc/doxygen/sig__source_8h_source.html) en donde podemos ver los siguientes:
 
@@ -30,4 +30,21 @@ auto src_sin = gr::analog::sig_source_f::make(
                  0.0,  /* Offset de amplitud */
                  0.0, /* Fase inicial */
                );
+```
+
+## Bloque Head
+
+Si queremos que el flujo se detenga después de un número definido de muestras, necesitamos el bloque `head`[[doc](https://www.gnuradio.org/doc/doxygen/classgr_1_1blocks_1_1head.html)]. 
+
+Por ejemplo, para procesar solo los primeros 20 ms de la señal del ejemplo anterior:
+
+```C++
+#include <gnuradio/blocks/head.h>
+
+const float fs = 44000.0f; // Frecuencia de muestreo
+const int tiempo_final = 40; // Tiempo final en ms
+const int num_muestras = static_cast<int>(fs * tiempo_final / 1000.0f);
+
+// Limitador de muestras
+auto head = gr::blocks::head::make(sizeof(float), num_muestras);
 ```
