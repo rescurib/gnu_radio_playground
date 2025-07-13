@@ -6,7 +6,6 @@
 #include <gnuradio/top_block.h>
 #include <gnuradio/filter/fir_filter_blk.h>
 #include <gnuradio/filter/firdes.h>
-#include <gnuradio/blocks/stream_to_vector.h>
 #include <gnuradio/blocks/stream_mux.h>
 #include <cstdlib>
 #include <iostream>
@@ -55,18 +54,16 @@ int main() {
         return 1;
     }
 
-    // Sink de archivo para dos señales (vector de 2 floats)
+    // Sink de archivo
     auto sink = gr::blocks::file_sink::make(sizeof(float), archivo_datos, true); // true: append mode
 
     // Limitador de muestras para cada señal
     auto head_unfiltered = gr::blocks::head::make(sizeof(float), num_muestras);
-    auto head_filtered = gr::blocks::head::make(sizeof(float), num_muestras);
+    auto head_filtered   = gr::blocks::head::make(sizeof(float), num_muestras);
 
     // Mux para combinar dos flujos en uno
     std::vector<int> input_lengths = {1, 1}; // Entramado de 1 float cada uno
     auto mux = gr::blocks::stream_mux::make(sizeof(float), input_lengths);
-
-    auto vectorizer = gr::blocks::stream_to_vector::make(sizeof(float), 2);
 
     /***********************************************************/
     //           Diseño del filtro FIR pasa-bajas                            
@@ -78,8 +75,7 @@ int main() {
                                      fs,
                                      lpf_cutoff, 
                                      lpf_trans, 
-                                     gr::fft::window::win_type::WIN_HAMMING, 
-                                     6.76 
+                                     gr::fft::window::win_type::WIN_HAMMING
                                    );
 
     auto lpf = gr::filter::fir_filter_fff::make(1, taps); // (decimación, coeficientes FIR)
@@ -92,8 +88,8 @@ int main() {
     tb->connect(adder2, 0, lpf, 0);
     tb->connect(adder2, 0, head_unfiltered, 0); // suma sin filtrar
     tb->connect(lpf, 0, head_filtered, 0);      // suma filtrada
-    tb->connect(head_unfiltered, 0, mux, 0); // primer señal
-    tb->connect(head_filtered, 0, mux, 1);   // segunda señal
+    tb->connect(head_unfiltered, 0, mux, 0);    // primer señal
+    tb->connect(head_filtered, 0, mux, 1);      // segunda señal
     tb->connect(mux, 0, sink, 0);
 
     // Ejecutar flujo
