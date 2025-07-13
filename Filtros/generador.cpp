@@ -13,7 +13,7 @@ int main(int argc, char** argv) {
 
     // Parámetros de la señal
     const float fs = 44000.0f; // Frecuencia de muestreo
-    const int tiempo_final = 40; // Tiempo final en ms
+    const int tiempo_final = 20; // Tiempo final en ms
     const int num_muestras = static_cast<int>(fs * tiempo_final / 1000.0f); // Número total de muestras
     float f1 = 200.0f;   // Frecuencia baja
     float f2 = 2000.0f;  // Frecuencia alta 1

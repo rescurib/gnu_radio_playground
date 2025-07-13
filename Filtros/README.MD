@@ -84,7 +84,7 @@ auto sink = gr::blocks::file_sink::make(sizeof(float)*1, "signal.dat", true); //
 
 ## Uniendo todas las piezas
 
-El programa generador.cpp crea y combina 3 generadores de señales senoidales, toma 20 ms de muestras y las guarda en un binario. El diagrama de bloques del flujo implementado es el siguiente:
+El programa generador.cpp crea y combina 3 generadores de señales senoidales, toma 20 o 40 ms de muestras y las guarda en un binario. El diagrama de bloques del flujo implementado es el siguiente:
 
 ```mermaid
 flowchart TD
@@ -103,3 +103,4 @@ flowchart TD
     ADD2 --> HEAD
     HEAD --> SINK
 ```
+La señal en el archivo binario puede ser graficado usando [GNU Octave](https://www.octave.org/) con el script signal_ploter.m :
