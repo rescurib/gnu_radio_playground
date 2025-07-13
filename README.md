@@ -1,4 +1,6 @@
-# Notas sueltas y experimentos con la API de GNU Radiode de C++
+# Notas sueltas y experimentos con la API de GNU Radio para C++
+
+He comenzado aprender a usar esta API para utilizarla en proyectos en la banda VLF con aplicaciones para radio-astronomía y ciencias espaciales. En particular, con instalaciones de [antenas de loop](https://physicsopenlab.org/2020/05/03/loop-antenna-for-very-low-frequency/) y tarjetas de sonido como dispositivos de digitalización. Este será mi repo para notas y pruebas.  
 
 ## Instalación en Linux Mint / Ubuntu
 
