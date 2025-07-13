@@ -21,7 +21,7 @@ En este ejemplo usarémos un bloque con entrada, salida y coeficientes tipo *flo
 
 ## Diseño y creación de filtro
 
-Para generar los coeficientes utilizamos:
+Para generar los coeficientes utilizamos la función `low_pass` del submódulo `firdes`[[doc](https://www.gnuradio.org/doc/doxygen/classgr_1_1filter_1_1firdes.html)]:
 
 ```C++
 #include <gnuradio/filter/fir_filter_blk.h>
