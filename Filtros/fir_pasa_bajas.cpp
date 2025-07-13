@@ -1,4 +1,3 @@
-// fir_pasa_bajas.cpp: Generador de suma de senos y llamado a Gnuplot
 #include <gnuradio/analog/sig_source.h>
 #include <gnuradio/blocks/add_blk.h>
 #include <gnuradio/blocks/file_sink.h>
@@ -7,7 +6,6 @@
 #include <gnuradio/filter/fir_filter_blk.h>
 #include <gnuradio/filter/firdes.h>
 #include <gnuradio/blocks/stream_mux.h>
-#include <cstdlib>
 #include <iostream>
 
 int main() {
@@ -62,7 +60,7 @@ int main() {
     auto head_filtered   = gr::blocks::head::make(sizeof(float), num_muestras);
 
     // Mux para combinar dos flujos en uno
-    std::vector<int> input_lengths = {1, 1}; // Entramado de 1 float cada uno
+    std::vector<int> input_lengths = {1, 1}; // Intercalado de 1 float cada uno
     auto mux = gr::blocks::stream_mux::make(sizeof(float), input_lengths);
 
     /***********************************************************/

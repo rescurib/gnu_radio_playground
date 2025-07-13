@@ -98,5 +98,9 @@ end
 
 % Ejecutar la función principal si se llama el script directamente
 if ~isdeployed
-    multi_signal_plotter();
+    if nargin == 0
+        multi_signal_plotter();
+    else
+        multi_signal_plotter(varargin{1});
+    end
 end
