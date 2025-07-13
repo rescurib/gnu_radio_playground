@@ -103,3 +103,16 @@ Los argumentos de grep y cut son los siguientes:
 * `-f 1`: primer campo de cada línea.
 
 GNU Radio también usa la librería [fmt](https://fmt.dev/11.1/) y para eso es el flag `-lfmt`.
+
+Para compilar la mayoria de los ejemplos de estas notas, debes cambiar el nombre del proyecto en el Makefile al nombre del archivo fuente que necesites. En el caso de este programa de verificación de instalación:
+
+```Makefile
+# Nombre del proyecto
+PROJECT_NAME = verify_gnu_radio
+```
+
+y hacer el build en el directorio del archivo fuente con:
+
+```Bash
+make
+```
