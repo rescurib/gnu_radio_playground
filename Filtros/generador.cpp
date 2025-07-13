@@ -60,7 +60,7 @@ int main(int argc, char** argv) {
     tb->connect(adder2, 0, head, 0);
     tb->connect(head, 0, sink, 0);
 
-      // Ejecutar flujo
+    // Ejecutar flujo
     tb->start();
     tb->wait();
     tb->stop();
