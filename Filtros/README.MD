@@ -106,5 +106,5 @@ flowchart TD
 La señal en el archivo binario puede ser graficado usando [GNU Octave](https://www.octave.org/) con el script [signal_ploter.m](https://github.com/rescurib/gnu_radio_playground/blob/main/Filtros/signal_plotter.m) :
 
 <p align="center">
-<img src="https://github.com/rescurib/gnu_radio_playground/blob/main/Filtros/gr_generador.png" width="680">
+<img src="https://github.com/rescurib/gnu_radio_playground/blob/main/Filtros/gr_generador.png" width="730">
 <p>
