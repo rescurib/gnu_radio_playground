@@ -2,6 +2,8 @@
 
 En esta carpeta voy a colocar notas de implementación de diferentes filtros digitales.
 
+* [Filtro Pasa-Bajas FIR](https://github.com/rescurib/gnu_radio_playground/blob/main/Filtros/fir_pasa_bajas.md)
+
 ## Bloque de generación de señal.
 
 La API de GNU Radio usa constantemente una característica de C++ llamada [Plantillas de Clase](https://learn.microsoft.com/es-es/cpp/cpp/templates-cpp). Es muy importante entender este concepto o será muy confuso utilizarla. [Aquí](https://www.youtube.com/watch?v=mQqzP9EWu58) hay un video conciso y bueno.
