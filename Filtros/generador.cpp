@@ -3,10 +3,7 @@
 #include <gnuradio/blocks/file_sink.h>
 #include <gnuradio/blocks/head.h>
 #include <gnuradio/top_block.h>
-#include <pmt/pmt.h>
 #include <iostream>
-#include <ctime>
-#include <fstream>
 #include <chrono>
 
 int main(int argc, char** argv) {
