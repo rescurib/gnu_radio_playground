@@ -1,8 +1,9 @@
 # Implementación de filtros digitales con GNU Radio
 
-En esta carpeta voy a colocar notas de implementación de diferentes filtros digitales.
+En esta carpeta voy a colocar notas en formato markdown con ejemplos de diferentes filtros digitales disponibles en GNU Radio.
 
 * [Filtro Pasa-Bajas FIR](https://github.com/rescurib/gnu_radio_playground/blob/main/Filtros/fir_pasa_bajas.md)
+* Filtro Pasa-Bajas IIR
 
 ## Bloque de generación de señal.
 
