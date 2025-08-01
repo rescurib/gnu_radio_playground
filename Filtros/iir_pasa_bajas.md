@@ -44,5 +44,39 @@ disp(["Orden del filtro IIR: ",num2str(n)]);
 <img src="https://github.com/rescurib/gnu_radio_playground/blob/main/Filtros/iir_respuesta.png" width="730">
 <p>
 
+El **retardo de grupo** (*group delay*) mide cuánto se retrasa, en promedio, cada componente de frecuencia de una señal al pasar por un filtro. Se define como la derivada negativa de la fase respecto a la frecuencia:
 
-## Bloque de filtro IIR
+```math
+\tau_g(\omega) = -\frac{d\phi(\omega)}{d\omega}
+```
+
+dónde $\phi(\omega)$ es la respuesta de fase (desenvuelta) del filtro. En Octave podemos obtener el retardo de grupo con la función grpdelay(). Aunque en este ejemplo no parece estar desenvolviendo la fase correctamente, asi que podemos calcularla a partir de su definición y de la respuesta compleja del filtro (obtenida con [freqz()](https://octave.sourceforge.io/octave/function/freqz.html)):
+
+```Matlab
+[H,f]  = freqz(b,a,[],fs);
+[gd,f] = grpdelay(b,a,[],fs);
+
+phi = unwrap(angle(H));
+group_delay = -diff(phi) ./ diff(2*pi*f/fs);
+
+plot(f(2:end), group_delay*1000/fs);
+title('Retardo de grupo del filtro IIR Chebyshev');
+xlabel('Frecuencia [Hz]'); ylabel('Retardo de grupo [ms]');
+```
+
+Para encontrar el retardo en una frecuencia en particular, por ejemplo en la componente de 200Hz:
+```Matlab
+% Obtener índice del arreglo f del valor más cercano a 200Hz
+[~, idx_200Hz] = min(abs(f(1:end-1) - 200));
+
+% Obtener retardo a partir del índice
+gd_muestras = group_delay(idx_200Hz);
+gd_ms       = gd_muestras * 1000 / fs;
+
+fprintf('Retardo en 200 Hz: %.3f ms\n', gd_ms);
+```
+Para nuestro filtro, el retardo en 200Hz es de 1.247ms.
+
+## Bloque de filtro 
+
+**Nota**: Los programas de este ejemplo ya están completos (iir_pasa_bajas.cpp, iir_lpf_design.m). Queda pendiente terminar este markdown.
