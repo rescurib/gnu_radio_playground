@@ -30,7 +30,7 @@ else
 endif
 
 % Escritura de coeficientes en archivo de texto como vectores C++
-fid = fopen("iir_coefficients.txt", "w");
+fid = fopen("iir_coeficientes.txt", "w");
 
 fprintf(fid, "// Coeficientes del filtro IIR pasa bajas (Chebyshev Tipo I)\n");
 fprintf(fid, "// Frecuencia de muestreo: %d Hz, Corte: %d Hz, BW transicion: %d Hz\n\n", fs, fc, transition_bw);

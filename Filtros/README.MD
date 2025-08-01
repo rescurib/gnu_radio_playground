@@ -3,7 +3,7 @@
 En esta carpeta voy a colocar notas en formato markdown con ejemplos de diferentes filtros digitales disponibles en GNU Radio.
 
 * [Filtro Pasa-Bajas FIR](https://github.com/rescurib/gnu_radio_playground/blob/main/Filtros/fir_pasa_bajas.md)
-* Filtro Pasa-Bajas IIR
+* [Filtro Pasa-Bajas IIR](https://github.com/rescurib/gnu_radio_playground/blob/main/Filtros/iir_pasa_bajas.md)
 
 ## Bloque de generación de señal.
 
