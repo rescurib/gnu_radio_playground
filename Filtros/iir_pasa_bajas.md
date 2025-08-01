@@ -2,12 +2,12 @@
 
 Para esta implemntación de un filtro *Infinite Impulse Response* (IIR) vamos a reutilizar la suma de fuentes senoidales del ejemplo FIR y también el sumidero de archivos con cabecera.
 
-Los filtros IIR de orden bajo pueden tener un desempeño similar al un filtro FIR de orden grande, reduciendo bastante la carga de cómputo. Pero nada es gratis es la vida. ¿Cuál es el precio que hay pagar?:
+Los filtros IIR de orden bajo pueden tener un desempeño similar al un filtro FIR de orden grande, reduciendo bastante la carga de cómputo. Pero nada es gratis es la vida. ¿Cuál es el precio que hay que pagar?:
 
 * La estabilidad no está garantizada
 * La señal filtrada no estará libre de distorsión. 
 
-Es por eso que si se van a usar en aplicaciones de instrumentación cientifica se debe tener una modelación clara para evaluar su uso, y también tener un diseño adecuado.
+Es por eso que si se van a usar en aplicaciones de instrumentación cientifica se debe tener una modelación clara para evaluar su uso, y tener un diseño adecuado en caso de implementarlo.
 
 GNU Radio, al menos hasta última version que estoy usando (3.10.9), no tiene una función de diseño de filtros IIR. Pero podemos utilizar Octave. Para instalarlo en sistemas basados en Debian junto con las librerías que vamos a ocupar:
 
@@ -38,6 +38,11 @@ Ws = (fc + transition_bw) / (fs/2); % Frecuencia de rechazo normalizada
 
 disp(["Orden del filtro IIR: ",num2str(n)]);
 ```
-¡Este filtro IIR solo de 9no orden!
+¡Este filtro IIR resultó de solo 9no orden! ¿Pero que tal nos fue en su respuesta?
+
+<p align="center">
+<img src="https://github.com/rescurib/gnu_radio_playground/blob/main/Filtros/iir_respuesta.png" width="730">
+<p>
+
 
 ## Bloque de filtro IIR
