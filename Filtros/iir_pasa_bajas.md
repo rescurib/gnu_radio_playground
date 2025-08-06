@@ -77,6 +77,10 @@ fprintf('Retardo en 200 Hz: %.3f ms\n', gd_ms);
 ```
 Para nuestro filtro, el retardo en 200Hz es de 1.247ms.
 
+>[!NOTE]
+> **Tratamiento Digital de señales (4ed)**, Proakis-Manolakis
+> * Respuesta en frecuencia de los sistemas LTI, pag. 281
+
 ## Bloque de filtro 
 
 **Nota**: Los programas de este ejemplo ya están completos (iir_pasa_bajas.cpp, iir_lpf_design.m). Queda pendiente terminar este markdown.
