@@ -4,6 +4,7 @@
 
 #include <gnuradio/random.h>
 #include <gnuradio/top_block.h>
+#include <gnuradio/analog/sig_source.h>
 #include <gnuradio/analog/random_uniform_source.h>
 #include <gnuradio/blocks/uchar_to_float.h>
 #include <gnuradio/blocks/float_to_char.h>
@@ -13,6 +14,8 @@
 #include <gnuradio/blocks/multiply_const.h>
 #include <gnuradio/blocks/complex_to_float.h>
 #include <gnuradio/digital/cpmmod_bc.h>
+
+#include <gnuradio/blocks/multiply.h>
 
 #include <gnuradio/qtgui/time_sink_f.h>
 #include <QWidget>
@@ -40,7 +43,7 @@ int main(int argc, char** argv) {
     auto scale_to_pm = gr::blocks::multiply_const_ff::make(2.0); // -0.5/0.5 -> -1/+1
     auto bb_pm       = gr::blocks::float_to_char::make();
 
-    // Sumador y convertidores de componentes IQ
+    // Sumador y convertidores de componentes IQ a FI
     auto c2ff   = gr::blocks::complex_to_float::make();
     auto iq_sum = gr::blocks::sub_ff::make();
 
@@ -59,10 +62,20 @@ int main(int argc, char** argv) {
                                // beta no se usa en LREC
     );
 
+    // Conversión Banda Base a Frecuencia Intermedia (IF)
+    const float fc = 800; // Frecuencia de la portadora (Hz)
+    auto mixer_osc = gr::analog::sig_source_c::make(samp_rate, gr::analog::GR_COS_WAVE, fc, 1.0, 0.0);
+
+    // Multiplicador complejo para mezclar la señal MSK con el oscilador
+    auto mixer = gr::blocks::multiply_cc::make();
+
+    /*************************************************/
+    /*              Sumidero  GUI                    */
+    /*************************************************/
+
     // Crear visualizador en tiempo (QT GUI Time Sink)
     const int size = 1024; // Muestras para mostrar
-    //const double samp_rate = 1000.0; 
-    const std::string name = "Flujo de bits aleatorios";
+    const std::string name = "Modulación MSK de tren de bits aleatorios";
     const unsigned int nconnections = 1;
 
     auto time_sink = gr::qtgui::time_sink_f::make(size, samp_rate, name, nconnections, nullptr);
@@ -71,7 +84,7 @@ int main(int argc, char** argv) {
     time_sink->enable_autoscale(false);  // Mantener rango de ejes fijos
     time_sink->enable_grid(true);
     time_sink->set_y_label("Amplitud", "");
-    time_sink->set_line_label(0, "Bitstream");
+    time_sink->set_line_label(0, "Señal MSK");
     time_sink->set_line_color(0, "blue");
     time_sink->enable_control_panel(true);
     time_sink->enable_tags(0, false);
@@ -85,10 +98,12 @@ int main(int argc, char** argv) {
     tb->connect(map_to_bipolar, 0, scale_to_pm, 0);
     tb->connect(scale_to_pm, 0, bb_pm, 0);
     tb->connect(bb_pm, 0, msk_mod, 0);
-    tb->connect(msk_mod, 0, c2ff, 0);
-    tb->connect(c2ff, 0, iq_sum, 0);
-    tb->connect(c2ff,1,iq_sum,1);
-    tb->connect(iq_sum,0,time_sink,0);
+
+    // Mezclar la señal MSK con el oscilador complejo para subir a banda IF
+    tb->connect(msk_mod, 0, mixer, 0);
+    tb->connect(mixer_osc, 0, mixer, 1);
+    tb->connect(mixer, 0, c2ff, 0); // Tomar parte real: y = I*cos(th) - Q*sin(th)
+    tb->connect(c2ff, 0, time_sink, 0);
 
     // Iniciar flowgraph
     tb->start();
