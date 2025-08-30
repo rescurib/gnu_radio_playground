@@ -9,14 +9,10 @@
 #include <gnuradio/blocks/uchar_to_float.h>
 #include <gnuradio/blocks/float_to_char.h>
 #include <gnuradio/blocks/add_const_ff.h>
-#include <gnuradio/blocks/add_blk.h>
-#include <gnuradio/blocks/sub.h>
 #include <gnuradio/blocks/multiply_const.h>
 #include <gnuradio/blocks/complex_to_float.h>
 #include <gnuradio/digital/cpmmod_bc.h>
-
 #include <gnuradio/blocks/multiply.h>
-
 #include <gnuradio/qtgui/time_sink_f.h>
 #include <QWidget>
 #include <QApplication>
@@ -45,7 +41,7 @@ int main(int argc, char** argv) {
 
     // Sumador y convertidores de componentes IQ a FI
     auto c2ff   = gr::blocks::complex_to_float::make();
-    auto iq_sum = gr::blocks::sub_ff::make();
+
 
     /*************************************************/
     /*              Modulador MSK                    */
