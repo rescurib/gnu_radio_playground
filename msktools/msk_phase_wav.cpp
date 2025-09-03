@@ -6,23 +6,43 @@
 #include <gnuradio/analog/sig_source.h>
 #include <gnuradio/blocks/wavfile_source.h>
 #include <gnuradio/blocks/add_blk.h>
-#include <gnuradio/blocks/sub.h>
-#include <gnuradio/blocks/multiply_const.h>
 #include <gnuradio/blocks/complex_to_float.h>
 #include <gnuradio/blocks/float_to_complex.h>
 #include <gnuradio/digital/cpmmod_bc.h>
-
-#include <gnuradio/analog/quadrature_demod_cf.h>
 #include <gnuradio/filter/fir_filter_blk.h>
 #include <gnuradio/filter/firdes.h>
-
 #include <gnuradio/blocks/multiply.h>
 #include <complex>
 #include <gnuradio/fft/goertzel_fc.h>
-
+#include <gnuradio/sync_block.h>
 #include <gnuradio/qtgui/time_sink_c.h>
 #include <QWidget>
 #include <QApplication>
+
+class print_block : public gr::sync_block {
+public:
+    typedef std::shared_ptr<print_block> sptr;
+    static sptr make() {
+        return gnuradio::get_initial_sptr(new print_block());
+    }
+
+    print_block()
+        : gr::sync_block("print_block",
+                         gr::io_signature::make(1, 1, sizeof(gr_complex)),
+                         gr::io_signature::make(0, 0, 0)) {}
+
+    int work(int noutput_items,
+             gr_vector_const_void_star &input_items,
+             gr_vector_void_star &) override {
+        const gr_complex *in = (const gr_complex*) input_items[0];
+        for (int i = 0; i < noutput_items; i++) {
+            float amplitude = std::abs(in[i]);
+            float phase = std::arg(in[i]);
+            std::cout << "Amplitude: " << amplitude << ", Phase: " << phase << std::endl;
+        }
+        return noutput_items;
+    }
+};
 
 
 int main(int argc, char** argv) {
@@ -45,8 +65,10 @@ int main(int argc, char** argv) {
     // Sumador y convertidores de componentes IQ a FI
     auto c2ff   = gr::blocks::complex_to_float::make();
 
-    // Demodulador de cuadratura
-    auto qdemod = gr::analog::quadrature_demod_cf::make(1.0);
+    // Bloque Goertzel para obtención de fase
+    const float goertzel_freq = 100.0f; // Frecuencia de interés
+    const int batch_samples = static_cast<int>(samp_rate * 0.5); // 0.5 segundos
+    auto goertzel = gr::fft::goertzel_fc::make(1, batch_samples, goertzel_freq);
 
     // Conversión de Frecuencia Intermedia (IF) a Banda Base
     const float fc = 800; // Frecuencia de la portadora (Hz)
@@ -58,6 +80,12 @@ int main(int argc, char** argv) {
     // IQ demodulator
     auto ff2c = gr::blocks::float_to_complex::make();
     auto zero_src  = gr::analog::sig_source_f::make(samp_rate, gr::analog::GR_CONST_WAVE, 0, 0.0, 0.0);
+
+    // Multiplicador para cuadrado de la señal
+    auto mult = gr::blocks::multiply_cc::make();
+
+    // Bloque a la medida para imprimir la fase
+    auto printer = print_block::make();
 
     /************************************************/
     /*          Filtro para demodulador             */
@@ -115,8 +143,13 @@ int main(int argc, char** argv) {
     tb->connect(ff2c, 0, mixer, 0);
     tb->connect(mixer_osc, 0, mixer, 1);
     tb->connect(mixer, 0, lpf,0);
-   // tb->connect(lpf, 0, qdemod, 0);
-    tb->connect(lpf, 0, time_sink, 0);
+    tb->connect(lpf,0,mult,0);
+    tb->connect(lpf,0,mult,1);
+    //tb->connect(mult, 0, time_sink, 0);
+    tb->connect(mult, 0, c2ff, 0);
+    tb->connect(c2ff, 0, goertzel, 0);
+    tb->connect(goertzel, 0, printer, 0);
+    tb->connect(mult, 0, time_sink, 0);
    
     // Iniciar flujo
     tb->start();
