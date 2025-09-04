@@ -5,7 +5,6 @@
 #include <gnuradio/top_block.h>
 #include <gnuradio/analog/sig_source.h>
 #include <gnuradio/blocks/wavfile_source.h>
-#include <gnuradio/blocks/add_blk.h>
 #include <gnuradio/blocks/complex_to_float.h>
 #include <gnuradio/blocks/float_to_complex.h>
 #include <gnuradio/digital/cpmmod_bc.h>
@@ -19,24 +18,31 @@
 #include <QWidget>
 #include <QApplication>
 
+// Bloque personalizado para imprimir la amplitud y fase de la señal
+// Hereda de gr::sync_block para integrarse en el flujo de GNU Radio
 class print_block : public gr::sync_block {
 public:
+    // Definición de tipo para shared_ptr
     typedef std::shared_ptr<print_block> sptr;
+    // Método estático para crear instancias del bloque
     static sptr make() {
         return gnuradio::get_initial_sptr(new print_block());
     }
 
+    // Constructor: define nombre y firmas de entrada/salida
     print_block()
         : gr::sync_block("print_block",
                          gr::io_signature::make(1, 1, sizeof(gr_complex)),
                          gr::io_signature::make(0, 0, 0)) {}
 
+    // Método principal de procesamiento del bloque
+    // Imprime amplitud y fase de cada muestra recibida
     int work(int noutput_items,
              gr_vector_const_void_star &input_items,
              gr_vector_void_star &) override {
         const gr_complex *in = (const gr_complex*) input_items[0];
         for (int i = 0; i < noutput_items; i++) {
-            float amplitude = std::abs(in[i]);
+            float amplitude = 2*std::abs(in[i]);
             float phase = std::arg(in[i]);
             std::cout << "Amplitude: " << amplitude << ", Phase: " << phase << std::endl;
         }
@@ -56,7 +62,7 @@ int main(int argc, char** argv) {
      auto tb = gr::make_top_block("MSK en banda base");
 
     // Fuente WAV
-    auto wav_source = gr::blocks::wavfile_source::make("msk_800_Hz_200_bps.wav", true); // true: repetir
+    auto wav_source = gr::blocks::wavfile_source::make("msk_800_Hz_200_bps.wav", false); // true: repetir
 
     // Leer tasa de muestreo del archivo
     // (nota: los objetos de bloque son shared_ptr's)
@@ -68,7 +74,7 @@ int main(int argc, char** argv) {
     // Bloque Goertzel para obtención de fase
     const float goertzel_freq = 100.0f; // Frecuencia de interés
     const int batch_samples = static_cast<int>(samp_rate * 0.5); // 0.5 segundos
-    auto goertzel = gr::fft::goertzel_fc::make(1, batch_samples, goertzel_freq);
+    auto goertzel = gr::fft::goertzel_fc::make(samp_rate, batch_samples, goertzel_freq);
 
     // Conversión de Frecuencia Intermedia (IF) a Banda Base
     const float fc = 800; // Frecuencia de la portadora (Hz)
@@ -145,7 +151,6 @@ int main(int argc, char** argv) {
     tb->connect(mixer, 0, lpf,0);
     tb->connect(lpf,0,mult,0);
     tb->connect(lpf,0,mult,1);
-    //tb->connect(mult, 0, time_sink, 0);
     tb->connect(mult, 0, c2ff, 0);
     tb->connect(c2ff, 0, goertzel, 0);
     tb->connect(goertzel, 0, printer, 0);
