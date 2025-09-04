@@ -43,8 +43,9 @@ public:
         const gr_complex *in = (const gr_complex*) input_items[0];
         for (int i = 0; i < noutput_items; i++) {
             float amplitude = 2*std::abs(in[i]);
-            float phase = std::arg(in[i]);
-            std::cout << "Amplitude: " << amplitude << ", Phase: " << phase << std::endl;
+            float phase_rad = std::arg(in[i]);
+            float phase_deg = phase_rad * 180.0f / M_PI; // Conversión a grados
+            std::cout << "Amplitud: " << amplitude << ", Fase: " << phase_deg << " grados" << std::endl;
         }
         return noutput_items;
     }
