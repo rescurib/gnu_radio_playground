@@ -14,7 +14,7 @@
 #include <complex>
 #include <gnuradio/fft/goertzel_fc.h>
 #include <gnuradio/sync_block.h>
-#include <gnuradio/qtgui/time_sink_f.h>
+#include <gnuradio/qtgui/time_sink_c.h>
 #include <QWidget>
 #include <QApplication>
 
@@ -67,13 +67,13 @@ int main(int argc, char** argv) {
 
     // Nota: obtener nombres de dispositivos con "arecord -l"
     auto soundcard = gr::audio::source::make(samp_rate, "plughw:1,0", true);
-/*
-    // Sumador y convertidores de componentes IQ a FI
+
+    // Convertidor de componentes IQ a FI
     auto c2ff   = gr::blocks::complex_to_float::make();
 
     // Bloque Goertzel para obtención de fase
     const float goertzel_freq = 100.0f; // Frecuencia de interés
-    const int batch_samples = static_cast<int>(samp_rate * 0.5); // 0.5 segundos
+    const int batch_samples = static_cast<int>(samp_rate * 1); // n segundo(n)
     auto goertzel = gr::fft::goertzel_fc::make(samp_rate, batch_samples, goertzel_freq);
 
     // Conversión de Frecuencia Intermedia (IF) a Banda Base
@@ -92,12 +92,11 @@ int main(int argc, char** argv) {
 
     // Bloque a la medida para imprimir la fase
     auto printer = print_block::make(); 
-*/
 
     /************************************************/
     /*          Filtro para demodulador             */
     /************************************************/
-/*
+
     // Filtro pasa bajas de 400 Hz
     // Diseño de filtro FIR
     const float lpf_cutoff = 400.0f;  // Frecuencia de corte
@@ -117,7 +116,7 @@ int main(int argc, char** argv) {
 
     std::cout << "Orden del filtro FIR: " << complex_taps.size() - 1 << std::endl;
     auto lpf = gr::filter::fir_filter_ccc::make(1, complex_taps);
-*/
+
     /*************************************************/
     /*              Sumidero  GUI                    */
     /*************************************************/
@@ -127,7 +126,7 @@ int main(int argc, char** argv) {
     const std::string name = "MSK en Banda Base";
     const unsigned int nconnections = 1;
 
-    auto time_sink = gr::qtgui::time_sink_f::make(size, samp_rate, name, nconnections, nullptr);
+    auto time_sink = gr::qtgui::time_sink_c::make(size, samp_rate, name, nconnections, nullptr);
     time_sink->set_update_time(0.10);    
     time_sink->set_y_axis(-1.5, 1.5);   
     time_sink->enable_autoscale(false);  // Mantener rango de ejes fijos
@@ -142,9 +141,9 @@ int main(int argc, char** argv) {
     time_sink->qwidget()->show();
 
     // Conectar bloques
-/*
+
     // Mezclar la señal MSK con el oscilador complejo
-    tb->connect(wav_source, 0, ff2c, 0);
+    tb->connect(soundcard, 0, ff2c, 0);
     tb->connect(zero_src,   0, ff2c, 1); // Parte imaginaria en cero
     tb->connect(ff2c, 0, mixer, 0);
     tb->connect(mixer_osc, 0, mixer, 1);
@@ -155,8 +154,8 @@ int main(int argc, char** argv) {
     tb->connect(c2ff, 0, goertzel, 0);
     tb->connect(goertzel, 0, printer, 0);
     tb->connect(mult, 0, time_sink, 0);
-*/
-    tb->connect(soundcard, 0, time_sink, 0);
+
+//    tb->connect(soundcard, 0, time_sink, 0);
    
     // Iniciar flujo
     tb->start();
