@@ -23,13 +23,15 @@ int main(int argc, char** argv) {
     /*************************************************/
     /*   Parámetros por línea de comandos (CLI)      */
     /*************************************************/
-    if (argc < 3) {
-        std::cerr << "Uso: " << argv[0] << " <duración_segundos> <archivo_wav>" << std::endl;
+    if (argc < 4) {
+        std::cerr << "Uso: " << argv[0] << " <duración_segundos> <sample_rate> <archivo_wav> " << std::endl;
         return 1;
     }
     // Duración en segundos y nombre de archivo WAV
     int duracion_segundos = std::stoi(argv[1]);
-    const char*  archivo_wav = argv[2];
+    double samp_rate = std::stod(argv[2]);
+    const char*  archivo_wav = argv[3];
+    
 
     /*************************************************/
     /*     Generación de flujo de bits aleatorios    */
@@ -54,8 +56,15 @@ int main(int argc, char** argv) {
     /*              Modulador MSK                    */
     /*************************************************/
     const double bit_rate = 200.0;
-    const int samples_per_sym = 32;
-    const double samp_rate = bit_rate * samples_per_sym;
+
+    // samples_per_sym debe ser un entero
+    int samples_per_sym = static_cast<int>(std::round(samp_rate / bit_rate));
+    if (samples_per_sym <= 0) {
+        std::cerr << "Error: sample_rate demasiado bajo para bit_rate=" << bit_rate << std::endl;
+        return 1;
+    }
+
+    //const double samp_rate = bit_rate * samples_per_sym;
 
     auto msk_mod = gr::digital::cpmmod_bc::make(
         gr::analog::cpm::LREC, /* tipo de pulso rectangular -> MSK */
