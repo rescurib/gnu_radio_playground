@@ -7,9 +7,8 @@
 #include <gnuradio/audio/source.h>
 #include <gnuradio/blocks/complex_to_float.h>
 #include <gnuradio/blocks/float_to_complex.h>
-#include <gnuradio/digital/cpmmod_bc.h>
-#include <gnuradio/filter/fir_filter_blk.h>
 #include <gnuradio/filter/firdes.h>
+#include <gnuradio/filter/freq_xlating_fir_filter.h>
 #include <gnuradio/blocks/multiply.h>
 #include <complex>
 #include <gnuradio/fft/goertzel_fc.h>
@@ -51,37 +50,26 @@ public:
     }
 };
 
-
 int main(int argc, char** argv) {
-
-    /*************************************************/
-    /*     Generación de flujo de bits aleatorios    */
-    /*************************************************/
 
      // Inicializar Qt GUI
      QApplication app(argc, argv);
      auto tb = gr::make_top_block("MSK en banda base");
 
     // Fuente de Tarjeta de Sonido (Sound Card)
-    const int samp_rate = 44100; // Tasa de muestreo en Hz
+    const int samp_rate = 48000; // Tasa de muestreo en Hz
 
     // Nota: obtener nombres de dispositivos con "arecord -l"
     auto soundcard = gr::audio::source::make(samp_rate, "plughw:1,0", true);
 
-    // Convertidor de componentes IQ a FI
+    // Convertidor de componentes FI a IQ
     auto c2ff   = gr::blocks::complex_to_float::make();
+    const int decimation = 8;
 
     // Bloque Goertzel para obtención de fase
     const float goertzel_freq = 100.0f; // Frecuencia de interés
-    const int batch_samples = static_cast<int>(samp_rate * 1); // n segundo(n)
-    auto goertzel = gr::fft::goertzel_fc::make(samp_rate, batch_samples, goertzel_freq);
-
-    // Conversión de Frecuencia Intermedia (IF) a Banda Base
-    const float fc = 800; // Frecuencia de la portadora (Hz)
-    auto mixer_osc = gr::analog::sig_source_c::make(samp_rate, gr::analog::GR_COS_WAVE, fc, 1.0, 0.0);
-
-    // Multiplicador complejo para mezclar la señal MSK con el oscilador
-    auto mixer = gr::blocks::multiply_cc::make();
+    const int batch_samples = static_cast<int>(samp_rate/decimation * 1); // n segundo(n)
+    auto goertzel = gr::fft::goertzel_fc::make(samp_rate/decimation, batch_samples, goertzel_freq);
 
     // IQ demodulator
     auto ff2c = gr::blocks::float_to_complex::make();
@@ -115,7 +103,12 @@ int main(int argc, char** argv) {
     }
 
     std::cout << "Orden del filtro FIR: " << complex_taps.size() - 1 << std::endl;
-    auto lpf = gr::filter::fir_filter_ccc::make(1, complex_taps);
+
+    // Convertidor de frecuencia y filtrado en un solo bloque
+    const float fc = 809; // Frecuencia de la portadora (Hz)
+    auto freq_xlating = gr::filter::freq_xlating_fir_filter_ccc::make(
+        decimation, complex_taps, fc, samp_rate
+    );
 
     /*************************************************/
     /*              Sumidero  GUI                    */
@@ -126,7 +119,7 @@ int main(int argc, char** argv) {
     const std::string name = "MSK en Banda Base";
     const unsigned int nconnections = 1;
 
-    auto time_sink = gr::qtgui::time_sink_c::make(size, samp_rate, name, nconnections, nullptr);
+    auto time_sink = gr::qtgui::time_sink_c::make(size, samp_rate/decimation, name, nconnections, nullptr);
     time_sink->set_update_time(0.10);    
     time_sink->set_y_axis(-1.5, 1.5);   
     time_sink->enable_autoscale(false);  // Mantener rango de ejes fijos
@@ -144,12 +137,10 @@ int main(int argc, char** argv) {
 
     // Mezclar la señal MSK con el oscilador complejo
     tb->connect(soundcard, 0, ff2c, 0);
-    tb->connect(zero_src,   0, ff2c, 1); // Parte imaginaria en cero
-    tb->connect(ff2c, 0, mixer, 0);
-    tb->connect(mixer_osc, 0, mixer, 1);
-    tb->connect(mixer, 0, lpf,0);
-    tb->connect(lpf,0,mult,0);
-    tb->connect(lpf,0,mult,1);
+    tb->connect(zero_src,  0, ff2c, 1); // Parte imaginaria en cero
+    tb->connect(ff2c, 0, freq_xlating, 0);
+    tb->connect(freq_xlating,0,mult,0);
+    tb->connect(freq_xlating,0,mult,1);
     tb->connect(mult, 0, c2ff, 0);
     tb->connect(c2ff, 0, goertzel, 0);
     tb->connect(goertzel, 0, printer, 0);
