@@ -3,7 +3,6 @@
 #include <chrono>
 
 #include <gnuradio/top_block.h>
-#include <gnuradio/analog/sig_source.h>
 #include <gnuradio/audio/source.h>
 #include <gnuradio/blocks/complex_to_float.h>
 #include <gnuradio/blocks/float_to_complex.h>
@@ -60,7 +59,7 @@ int main(int argc, char** argv) {
     const int samp_rate = 48000; // Tasa de muestreo en Hz
 
     // Nota: obtener nombres de dispositivos con "arecord -l"
-    auto soundcard = gr::audio::source::make(samp_rate, "plughw:1,0", true);
+    auto soundcard = gr::audio::source::make(samp_rate, "hw:1,0", true);
 
     // Convertidor de componentes FI a IQ
     auto c2ff   = gr::blocks::complex_to_float::make();
@@ -70,10 +69,6 @@ int main(int argc, char** argv) {
     const float goertzel_freq = 100.0f; // Frecuencia de interés
     const int batch_samples = static_cast<int>(samp_rate/decimation * 1); // n segundo(n)
     auto goertzel = gr::fft::goertzel_fc::make(samp_rate/decimation, batch_samples, goertzel_freq);
-
-    // IQ demodulator
-    auto ff2c = gr::blocks::float_to_complex::make();
-    auto zero_src  = gr::analog::sig_source_f::make(samp_rate, gr::analog::GR_CONST_WAVE, 0, 0.0, 0.0);
 
     // Multiplicador para cuadrado de la señal
     auto mult = gr::blocks::multiply_cc::make();
@@ -106,7 +101,7 @@ int main(int argc, char** argv) {
 
     // Convertidor de frecuencia y filtrado en un solo bloque
     const float fc = 809; // Frecuencia de la portadora (Hz)
-    auto freq_xlating = gr::filter::freq_xlating_fir_filter_ccc::make(
+    auto freq_xlating = gr::filter::freq_xlating_fir_filter_fcc::make(
         decimation, complex_taps, fc, samp_rate
     );
 
@@ -125,8 +120,9 @@ int main(int argc, char** argv) {
     time_sink->enable_autoscale(false);  // Mantener rango de ejes fijos
     time_sink->enable_grid(true);
     time_sink->set_y_label("Amplitud", "");
-    time_sink->set_line_label(0, "Bitstream");
+    time_sink->set_line_label(0, "I");
     time_sink->set_line_color(0, "blue");
+    time_sink->set_line_label(1, "Q");
     time_sink->enable_control_panel(true);
     time_sink->enable_tags(0, false);
 
@@ -136,9 +132,7 @@ int main(int argc, char** argv) {
     // Conectar bloques
 
     // Mezclar la señal MSK con el oscilador complejo
-    tb->connect(soundcard, 0, ff2c, 0);
-    tb->connect(zero_src,  0, ff2c, 1); // Parte imaginaria en cero
-    tb->connect(ff2c, 0, freq_xlating, 0);
+    tb->connect(soundcard, 0, freq_xlating, 0);
     tb->connect(freq_xlating,0,mult,0);
     tb->connect(freq_xlating,0,mult,1);
     tb->connect(mult, 0, c2ff, 0);
